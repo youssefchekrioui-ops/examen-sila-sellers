@@ -95,6 +95,16 @@ input#studentName{
 }
 input#studentName::placeholder{color:#6a6a5f;}
 input#studentName:focus{border-color:var(--gold);}
+input#studentName.input-error{border-color:#b3453f;}
+input#studentName.input-error:focus{border-color:#b3453f;}
+.field-error-msg{
+  display:none;
+  color:#e0857f;
+  font-size:10.5px;
+  margin:-10px 0 14px 0;
+  text-align:left;
+}
+.field-error-msg.visible{display:block;}
 .btn{
   display:inline-block;
   padding:13px 26px;
@@ -262,6 +272,7 @@ input#studentName:focus{border-color:var(--gold);}
     <div class="start-sub">30 preguntas sobre Fase 1 y Fase 2 del programa.<br>Al terminar verás tu nota al momento, con el repaso de cada pregunta.</div>
     <div class="start-meta">MÓDULOS 1 · 2 · 4 · 5 · 7 · 8 · 9 · 10 · 11 · 12</div>
     <input type="text" id="studentName" placeholder="Escribe tu nombre completo" />
+    <div class="field-error-msg" id="nameError">Escribe tu nombre para continuar.</div>
     <button class="btn btn-gold btn-full" id="btnStart">Comenzar examen</button>
     <div class="start-note">Tiempo estimado: 45–60 min · Aprobado sugerido: 24/30 (80%)</div>
   </div>
@@ -397,15 +408,32 @@ function updateProgress(){
   document.getElementById('bbStatus').innerHTML = `Has respondido <strong>${answered}</strong> de ${TOTAL} preguntas`;
 }
 
+const nameInputEl = document.getElementById('studentName');
+const nameErrorEl = document.getElementById('nameError');
+
+function clearNameError(){
+  nameInputEl.classList.remove('input-error');
+  nameErrorEl.classList.remove('visible');
+}
+
+function showNameError(){
+  nameInputEl.classList.add('input-error');
+  nameErrorEl.classList.add('visible');
+}
+
+// clear the error the moment the student starts fixing it
+nameInputEl.addEventListener('input', () => {
+  if(nameInputEl.value.trim()) clearNameError();
+});
+
 document.getElementById('btnStart').addEventListener('click', () => {
-  const nameInput = document.getElementById('studentName');
-  studentName = nameInput.value.trim();
+  studentName = nameInputEl.value.trim();
   if(!studentName){
-    nameInput.style.borderColor = '#b3453f';
-    nameInput.placeholder = 'Escribe tu nombre para continuar';
-    nameInput.focus();
+    showNameError();
+    nameInputEl.focus();
     return;
   }
+  clearNameError();
   buildQuiz();
   updateProgress();
   showScreen('quiz');
